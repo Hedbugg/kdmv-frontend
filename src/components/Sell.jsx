@@ -68,7 +68,7 @@ function Sell() {
     }
 
     try {
-      const response = await fetch("http://localhost/KDMV/sendOrderTodb.php", {
+      const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

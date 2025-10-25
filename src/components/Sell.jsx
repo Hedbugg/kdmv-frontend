@@ -24,7 +24,7 @@ function Sell() {
 
   // 🧩 Fetch product data from database
   useEffect(() => {
-    fetch("http://localhost/KDMV/getProducts.php")
+    fetch("https://hedbugg.kesug.com/getProducts.php")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {

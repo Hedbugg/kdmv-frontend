@@ -1,0 +1,58 @@
+.Loginform {
+  margin-bottom: 50px;
+  margin: auto;
+  width: 50%;
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  color: white; 
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.7); /* black shadow */
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  
+}
+.body
+.Loginform h2 {
+  margin-bottom: 20px;
+}
+
+.Loginform input {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+}
+
+.Loginform button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+.Loginform button:hover {
+  background-color: #0056b3;
+}
+
+.labelName,
+.labelPass {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  text-align: left;
+  margin-left: 10%;
+}
+
+.message {
+  color: red;
+  margin-top: 15px;
+}
+body {
+  background: url("/img/background.jpg") no-repeat center center fixed;
+  background-size: cover;  /* makes the image cover the whole screen */
+  margin: 0;
+  font-family: Arial, sans-serif;
+}

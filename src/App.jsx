@@ -3,21 +3,10 @@ import Login from "./Page/Login";
 
 import Sell from "./components/Sell";
 function App() {
-
-        return(
-          <Router>
-            <Routes >
-                <Route path = "/" element = {<Login />} />
-                  <Route path="/sell" element={<Sell />} />
-          
-            </Routes >
-
-
-          </Router>
-
-        
-
+    return(
+          <Sell/>
         );
+
 
 }
 export default App;

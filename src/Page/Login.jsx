@@ -8,31 +8,57 @@ function Login() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  // ▼▼▼ PASTE THE DEBUG VERSION HERE ▼▼▼
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    console.log("🔍 DEBUG: Sending login request...");
+    console.log("Username:", username);
+    console.log("Password:", password);
 
     try {
+      const requestBody = JSON.stringify({ username, password });
+      console.log("Request body:", requestBody);
+
       const response = await fetch("https://hedbugg.kesug.com/loggin.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: requestBody,
       });
 
-      const data = await response.json();
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
+
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
+
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError);
+        setMessage("Server returned invalid response");
+        return;
+      }
+
+      console.log("Parsed data:", data);
 
       if (data.success) {
-        navigate("/sell"); // redirect if success
+        navigate("/sell");
       } else {
         setMessage(data.message || "Invalid username or password");
       }
     } catch (error) {
-      setMessage("Error connecting to server");
+      console.error("Fetch error:", error);
+      setMessage("Error connecting to server: " + error.message);
     }
   };
+  // ▲▲▲ END OF DEBUG CODE ▲▲▲
 
-  return (
-
-    
+  return (  
     <div className="Loginform">
       <h2>Login</h2>
       <form onSubmit={handleLogin}>

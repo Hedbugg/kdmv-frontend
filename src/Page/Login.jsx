@@ -20,7 +20,7 @@ function Login() {
       const requestBody = JSON.stringify({ username, password });
       console.log("Request body:", requestBody);
 
-      const response = await fetch("https://hedbugg.kesug.com/loggin.php", {
+      const response = await fetch("https://hedbugg.kesug.com/test.php", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

@@ -1,5 +1,5 @@
 import "./../Style/Sell.css";
-import { useState, useEffect } from "react"; //useState like fuction
+import { useState, useEffect } from "react";
 import Header from "./Header";
 import ProductCard from "./ProductCard";
 import OrderSection from "./OrdereSection";
@@ -8,7 +8,9 @@ function Sell() {
   const [time, setTime] = useState(new Date().toLocaleTimeString());
   const [total, setTotal] = useState(0);
   const [products, setProducts] = useState([]);
-  const [cartItems, setCartItems] = useState([]); // 🛒 store added items
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   function AfterClick() {
     window.alert("click");
@@ -24,16 +26,31 @@ function Sell() {
 
   // 🧩 Fetch product data from database
   useEffect(() => {
-    fetch("https://hedbugg.kesug.com/getProducts.php")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setProducts(data.data);
-        } else {
-          console.error("Failed to load products");
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("https://hedbugg.kesug.com/getProducts.php");
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      })
-      .catch((err) => console.error("Error:", err));
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          setProducts(data.data || []);
+        } else {
+          setError(data.message || "Failed to load products");
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   // ➕ Add item to cart and sum price
@@ -57,7 +74,7 @@ function Sell() {
   // ❌ Clear order
   const handleClear = () => {
     setTotal(0);
-    setCartItems([]); // clear all added items
+    setCartItems([]);
   };
 
   // 🛒 Send order to backend
@@ -70,15 +87,24 @@ function Sell() {
     try {
       const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({
           items: cartItems.map((item) => ({
             product_name: item.name,
             price: Number(item.price),
             quantity: item.quantity,
           })),
+          total: total,
         }),
       });
+
+      // Check if response is OK before parsing JSON
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
 
       const data = await response.json();
 
@@ -87,11 +113,11 @@ function Sell() {
         setCartItems([]);
         setTotal(0);
       } else {  
-        window.alert("Failed to save order: " + data.message);
+        window.alert("Failed to save order: " + (data.message || "Unknown error"));
       }
     } catch (error) {
-      console.error("Error:", error);
-      window.alert("Error connecting to server");
+      console.error("Order error:", error);
+      window.alert("Error connecting to server: " + error.message);
     }
   };
 
@@ -99,6 +125,10 @@ function Sell() {
     <div className="sell-container">
       {/* Header */}
       <Header time={time} />
+
+      {/* Loading and Error States */}
+      {loading && <div className="loading">Loading products...</div>}
+      {error && <div className="error">Error: {error}</div>}
 
       {/* Product Grid */}
       <div className="product-grid">
@@ -111,10 +141,8 @@ function Sell() {
           />
         ))}
       </div>
-            
 
-
-      {/* Optional: show added items */}
+      {/* Cart Preview */}
       {cartItems.length > 0 && (
         <div className="cart-preview">
           <h3>Your Order:</h3>
@@ -124,23 +152,27 @@ function Sell() {
                 {item.name} x {item.quantity} = $
                 {(item.price * item.quantity).toFixed(2)}
               </li>
-
-            
             ))}
-
           </ul>
-                {/* Order Section */} 
-       <OrderSection
-        total={total}
-        handleClear={handleClear}
-        handleAdd={handleAdd}
-        handleOrder={handleOrder}
-      />
+          
+          {/* Order Section */} 
+          <OrderSection
+            total={total}
+            handleClear={handleClear}
+            handleOrder={handleOrder}
+          />
         </div>
       )}
 
-
-      
+      {/* Show OrderSection even when cart is empty but with disabled order button */}
+      {cartItems.length === 0 && (
+        <OrderSection
+          total={total}
+          handleClear={handleClear}
+          handleOrder={handleOrder}
+          disabled={true}
+        />
+      )}
     </div>
   );
 }

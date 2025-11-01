@@ -98,12 +98,13 @@ try {
     }
 
     try {
-      const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
+const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
+  method: "POST",
+  credentials: "include", // ✅ Required for Allow-Credentials
+  headers: { 
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  },
         body: JSON.stringify({
           items: cartItems.map((item) => ({
             product_name: item.name,

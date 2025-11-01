@@ -35,7 +35,16 @@ function Sell() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
+        const text = await response.text();
+console.log("Raw response:", text);  // ✅ See exact output
+
+let data;
+try {
+  data = JSON.parse(text); // ✅ Manually parse JSON
+} catch (parseError) {
+  throw new Error("Invalid JSON from server");
+}
+
         
         if (data.success) {
           setProducts(data.data || []);

@@ -29,7 +29,11 @@ function Sell() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch("https://hedbugg.kesug.com/getProducts.php");
+        const response = await fetch("https://hedbugg.kesug.com/getProducts.php", {
+  method: "GET",
+  credentials: "include" // ✅ Required for Allow-Credentials
+});
+
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

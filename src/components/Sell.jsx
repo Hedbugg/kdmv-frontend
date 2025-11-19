@@ -36,7 +36,7 @@ function Sell() {
         //   //credentials: "include",
         // });
 
-        const response = await fetch("https://hedbugg.kesug.com/getProducts.php");
+        const response = await fetch("https://hedbugg.kesug.com/products.php");
 
 
         const text = await response.text();

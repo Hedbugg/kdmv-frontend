@@ -12,6 +12,7 @@ function Sell() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // For testing onclick
   function AfterClick() {
     window.alert("click");
   }
@@ -24,37 +25,37 @@ function Sell() {
     return () => clearInterval(timer);
   }, []);
 
-  // 🧩 Fetch product data from database
+  // 🧩 Fetch product data
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
+
         const response = await fetch("https://hedbugg.kesug.com/getProducts.php", {
-  method: "GET",
-  credentials: "include" // ✅ Required for Allow-Credentials
-});
+          method: "GET",
+          credentials: "include",
+        });
 
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
         const text = await response.text();
-console.log("Raw response:", text);  // ✅ See exact output
+        console.log("RAW PRODUCT RESPONSE:", text);
 
-let data;
-try {
-  data = JSON.parse(text); // ✅ Manually parse JSON
-} catch (parseError) {
-  throw new Error("Invalid JSON from server");
-}
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
 
-        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (err) {
+          throw new Error("Server returned invalid JSON");
+        }
+
         if (data.success) {
           setProducts(data.data || []);
         } else {
           setError(data.message || "Failed to load products");
         }
+
       } catch (err) {
         console.error("Fetch error:", err);
         setError(err.message);
@@ -66,28 +67,29 @@ try {
     fetchProducts();
   }, []);
 
-  // ➕ Add item to cart and sum price
+  // ➕ Add to cart
   const handleAdd = (product) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
+
       if (existing) {
         return prev.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
-      } else {
-        return [...prev, { ...product, quantity: 1 }];
       }
+
+      return [...prev, { ...product, quantity: 1 }];
     });
 
-    setTotal((prevTotal) => prevTotal + Number(product.price));
+    setTotal((prev) => prev + Number(product.price));
   };
 
-  // ❌ Clear order
+  // ❌ Clear cart
   const handleClear = () => {
-    setTotal(0);
     setCartItems([]);
+    setTotal(0);
   };
 
   // 🛒 Send order to backend
@@ -98,54 +100,54 @@ try {
     }
 
     try {
-const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",
-  body: JSON.stringify({
-    items: cartItems.map((item) => ({
-      product_name: item.name,
-      price: Number(item.price),
-      quantity: item.quantity
-    })),
-    total: total
-  }),
-});
+      const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          items: cartItems.map((item) => ({
+            product_name: item.name,
+            price: Number(item.price),
+            quantity: item.quantity,
+          })),
+          total: total,
+        }),
+      });
 
-const text = await response.text();
-console.log("SERVER RAW RESPONSE:", text);
+      const text = await response.text();
+      console.log("RAW ORDER RESPONSE:", text);
 
-
-      // Check if response is OK before parsing JSON
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        throw new Error("Server returned invalid JSON");
+      }
 
       if (data.success) {
         window.alert(`Order saved successfully! Total: $${total.toFixed(2)}`);
-        setCartItems([]);
-        setTotal(0);
-      } else {  
+        handleClear();
+      } else {
         window.alert("Failed to save order: " + (data.message || "Unknown error"));
       }
+
     } catch (error) {
       console.error("Order error:", error);
-      window.alert("Error connecting to server: " + error.message);
+      window.alert("Error: " + error.message);
     }
   };
 
   return (
     <div className="sell-container">
-      {/* Header */}
       <Header time={time} />
 
-      {/* Loading and Error States */}
       {loading && <div className="loading">Loading products...</div>}
       {error && <div className="error">Error: {error}</div>}
 
-      {/* Product Grid */}
       <div className="product-grid">
         {products.map((product) => (
           <ProductCard
@@ -157,7 +159,6 @@ console.log("SERVER RAW RESPONSE:", text);
         ))}
       </div>
 
-      {/* Cart Preview */}
       {cartItems.length > 0 && (
         <div className="cart-preview">
           <h3>Your Order:</h3>
@@ -169,8 +170,7 @@ console.log("SERVER RAW RESPONSE:", text);
               </li>
             ))}
           </ul>
-          
-          {/* Order Section */} 
+
           <OrderSection
             total={total}
             handleClear={handleClear}
@@ -179,7 +179,7 @@ console.log("SERVER RAW RESPONSE:", text);
         </div>
       )}
 
-      {/* Show OrderSection even when cart is empty but with disabled order button */}
+      {/* Show disabled OrderSection when cart empty */}
       {cartItems.length === 0 && (
         <OrderSection
           total={total}

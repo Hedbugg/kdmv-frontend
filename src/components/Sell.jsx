@@ -12,36 +12,27 @@ function Sell() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // For testing onclick
+  // 🔔 Just for test
   function AfterClick() {
     window.alert("click");
   }
 
-  // ⏰ Update time every second
+  // ⏰ Clock update every second
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date().toLocaleTimeString());
     }, 1000);
+
     return () => clearInterval(timer);
   }, []);
 
-  // 🧩 Fetch product data
+  // 🧩 Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
 
-        // const response = await fetch("https://hedbugg.kesug.com/getProducts.php", {
-        //  // method: "GET",
-        //   //credentials: "include",
-        // });
-
-       fetch("https://hedbugg.kesug.com/products.php")
-    .then(res => res.json())
-    .then(data => console.log(data))
-    .catch(err => console.error("Fetch error:", err));
-
-
+        const response = await fetch("https://hedbugg.kesug.com/products.php");
 
         const text = await response.text();
         console.log("RAW PRODUCT RESPONSE:", text);
@@ -74,11 +65,10 @@ function Sell() {
     fetchProducts();
   }, []);
 
-  // ➕ Add to cart
+  // ➕ Add item to cart
   const handleAdd = (product) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
-
       if (existing) {
         return prev.map((item) =>
           item.id === product.id
@@ -86,7 +76,6 @@ function Sell() {
             : item
         );
       }
-
       return [...prev, { ...product, quantity: 1 }];
     });
 
@@ -99,7 +88,7 @@ function Sell() {
     setTotal(0);
   };
 
-  // 🛒 Send order to backend
+  // 🛒 Send order to server
   const handleOrder = async () => {
     if (cartItems.length === 0) {
       window.alert("Please order something");
@@ -110,7 +99,6 @@ function Sell() {
       const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           items: cartItems.map((item) => ({
             product_name: item.name,
@@ -186,7 +174,6 @@ function Sell() {
         </div>
       )}
 
-      {/* Show disabled OrderSection when cart empty */}
       {cartItems.length === 0 && (
         <OrderSection
           total={total}

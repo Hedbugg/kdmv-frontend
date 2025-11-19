@@ -31,10 +31,13 @@ function Sell() {
       try {
         setLoading(true);
 
-        const response = await fetch("https://hedbugg.kesug.com/getProducts.php", {
-          method: "GET",
-          credentials: "include",
-        });
+        // const response = await fetch("https://hedbugg.kesug.com/getProducts.php", {
+        //  // method: "GET",
+        //   //credentials: "include",
+        // });
+
+        const response = await fetch("https://hedbugg.kesug.com/getProducts.php");
+
 
         const text = await response.text();
         console.log("RAW PRODUCT RESPONSE:", text);

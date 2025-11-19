@@ -12,51 +12,34 @@ function Sell() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 🔔 Just for test
-  function AfterClick() {
-    window.alert("click");
-  }
-
-  // ⏰ Clock update every second
+  // Clock update
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date().toLocaleTimeString());
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
-  // 🧩 Fetch products
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
 
-        const response = await fetch("https://hedbugg.kesug.com/products.php");
+        const res = await fetch("https://hedbugg.kesug.com/products.php");
+        const data = await res.json();
 
-        const text = await response.text();
-        console.log("RAW PRODUCT RESPONSE:", text);
+        console.log("PRODUCTS:", data);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
+        if (!data.success) {
+          setError("Failed to load products");
+          return;
         }
 
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (err) {
-          throw new Error("Server returned invalid JSON");
-        }
-
-        if (data.success) {
-          setProducts(data.data || []);
-        } else {
-          setError(data.message || "Failed to load products");
-        }
-
+        setProducts(data.data);
       } catch (err) {
         console.error("Fetch error:", err);
-        setError(err.message);
+        setError("Failed to connect to server");
       } finally {
         setLoading(false);
       }
@@ -65,7 +48,6 @@ function Sell() {
     fetchProducts();
   }, []);
 
-  // ➕ Add item to cart
   const handleAdd = (product) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
@@ -76,19 +58,18 @@ function Sell() {
             : item
         );
       }
+
       return [...prev, { ...product, quantity: 1 }];
     });
 
     setTotal((prev) => prev + Number(product.price));
   };
 
-  // ❌ Clear cart
   const handleClear = () => {
     setCartItems([]);
     setTotal(0);
   };
 
-  // 🛒 Send order to server
   const handleOrder = async () => {
     if (cartItems.length === 0) {
       window.alert("Please order something");
@@ -96,7 +77,7 @@ function Sell() {
     }
 
     try {
-      const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
+      const res = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -109,30 +90,18 @@ function Sell() {
         }),
       });
 
-      const text = await response.text();
-      console.log("RAW ORDER RESPONSE:", text);
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (err) {
-        throw new Error("Server returned invalid JSON");
-      }
+      const data = await res.json();
+      console.log("ORDER RESPONSE:", data);
 
       if (data.success) {
-        window.alert(`Order saved successfully! Total: $${total.toFixed(2)}`);
+        window.alert(`Order saved! Total: $${total.toFixed(2)}`);
         handleClear();
       } else {
-        window.alert("Failed to save order: " + (data.message || "Unknown error"));
+        window.alert("Failed to save order");
       }
-
-    } catch (error) {
-      console.error("Order error:", error);
-      window.alert("Error: " + error.message);
+    } catch (err) {
+      console.error("Order error:", err);
+      window.alert("Server error");
     }
   };
 
@@ -149,7 +118,6 @@ function Sell() {
             key={product.id}
             product={product}
             handleAdd={handleAdd}
-            AfterClick={AfterClick}
           />
         ))}
       </div>
@@ -177,8 +145,6 @@ function Sell() {
       {cartItems.length === 0 && (
         <OrderSection
           total={total}
-          handleClear={handleClear}
-          handleOrder={handleOrder}
           disabled={true}
         />
       )}

@@ -100,20 +100,21 @@ try {
     try {
 const response = await fetch("https://hedbugg.kesug.com/sendOrderTodb.php", {
   method: "POST",
-  credentials: "include", // ✅ Required for Allow-Credentials
-  headers: { 
-    "Content-Type": "application/json",
-    "Accept": "application/json"
-  },
-        body: JSON.stringify({
-          items: cartItems.map((item) => ({
-            product_name: item.name,
-            price: Number(item.price),
-            quantity: item.quantity,
-          })),
-          total: total,
-        }),
-      });
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({
+    items: cartItems.map((item) => ({
+      product_name: item.name,
+      price: Number(item.price),
+      quantity: item.quantity
+    })),
+    total: total
+  }),
+});
+
+const text = await response.text();
+console.log("SERVER RAW RESPONSE:", text);
+
 
       // Check if response is OK before parsing JSON
       if (!response.ok) {

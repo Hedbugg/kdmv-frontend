@@ -8,7 +8,7 @@ function OrderSection({ total, handleClear, handleOrder }) {
         Order
       </button>
       <button className="clear-btt" onClick={handleClear}>
-        Clear
+        Clears
       </button>
       
     </div>
